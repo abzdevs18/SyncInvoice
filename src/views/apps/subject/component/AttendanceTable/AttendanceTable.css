@@ -1,0 +1,30 @@
+.dynamic-table {
+  display: flex;
+}
+
+.students-sidebar {
+  flex: 0.2; /* 20% of the container */
+  border-right: 1px solid black;
+  padding: 10px;
+}
+
+.months-table {
+  flex: 0.8; /* 80% of the container */
+  overflow-x: auto; /* In case the content overflows */
+}
+
+.months-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.months-table th,
+.months-table td {
+  border: 1px solid black;
+  padding: 5px;
+  text-align: center;
+}
+
+.highlighted {
+  background-color: yellow; /* Highlighted background color for the current date */
+}

@@ -1,0 +1,181 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model aans__admin {
+  id       Int    @id @default(autoincrement())
+  name     String @db.VarChar(150)
+  username String @db.VarChar(255)
+  password String @db.VarChar(255)
+}
+
+model aans__student {
+  id                 Int       @id @default(autoincrement())
+  name               String?   @db.VarChar(255)
+  m_name             String?   @db.VarChar(255)
+  l_name             String?   @db.VarChar(255)
+  gender             String?   @db.VarChar(10)
+  s_dob              DateTime? @db.Date
+  s_placeofbirth     String?   @db.VarChar(255)
+  nationality        String?   @db.VarChar(255)
+  learning__modality String    @db.VarChar(150)
+}
+
+model aans__student_accommodation {
+  id           Int      @id @default(autoincrement())
+  fk_id        Int?
+  type         String?  @db.VarChar(255)
+  is_signed    Boolean?
+  mode_travel  String?  @db.VarChar(255)
+  pickup_place String?  @db.VarChar(255)
+  driver_name  String?  @db.VarChar(255)
+
+  @@index([fk_id], map: "fk_id")
+}
+
+model aans__student_contact {
+  id       Int     @id @default(autoincrement())
+  fk_id    Int?
+  platform String? @db.VarChar(255)
+  account  String? @db.VarChar(255)
+
+  @@index([fk_id], map: "fk_id")
+}
+
+model aans__student_family {
+  id           Int     @id @default(autoincrement())
+  fk_id        Int?
+  relationship String? @db.VarChar(255)
+  f_name       String? @db.VarChar(255)
+  m_name       String? @db.VarChar(255)
+  l_name       String? @db.VarChar(255)
+  nationality  String? @db.VarChar(255)
+  occupation   String? @db.VarChar(255)
+  religion     String? @db.VarChar(255)
+  contact      String? @db.VarChar(20)
+
+  @@index([fk_id], map: "fk_id")
+}
+
+model aans__student_financial {
+  id           Int     @id @default(autoincrement())
+  fk_id        Int?
+  f_name       String? @db.VarChar(255)
+  l_name       String? @db.VarChar(255)
+  m_name       String? @db.VarChar(255)
+  relationship String? @db.VarChar(255)
+  address      String? @db.VarChar(255)
+  email        String? @db.VarChar(255)
+  phone        String? @db.VarChar(20)
+
+  @@index([fk_id], map: "fk_id")
+}
+
+model aans__student_medical {
+  id         Int     @id @default(autoincrement())
+  fk_id      Int?
+  blood_type String? @db.VarChar(10)
+  allergies  String? @db.VarChar(255)
+  treatment  String? @db.VarChar(255)
+  height     Float?  @db.Float
+  weight     Float?  @db.Float
+
+  @@index([fk_id], map: "fk_id")
+}
+
+model aans__student_prev_school {
+  id                   Int     @id @default(autoincrement())
+  fk_id                Int?
+  last_school_attended String? @db.VarChar(255)
+  school_year          String? @db.VarChar(20)
+  school_address       String? @db.VarChar(255)
+  school_principal     String? @db.VarChar(255)
+  school_contact       String? @db.VarChar(20)
+
+  @@index([fk_id], map: "fk_id")
+}
+
+model aans__student_religious_affiliation {
+  id           Int       @id @default(autoincrement())
+  fk_id        Int?
+  religion     String?   @db.VarChar(255)
+  is_baptized  Boolean?
+  date_baptize DateTime? @db.Date
+
+  @@index([fk_id], map: "fk_id")
+}
+
+model invoice {
+  id            Int                   @id @default(autoincrement())
+  name          String
+  total         Int
+  avatar        String
+  service       String
+  dueDate       DateTime
+  address       String
+  company       String
+  country       String
+  contact       String
+  avatarColor   String?
+  issuedDate    DateTime
+  companyEmail  String
+  balance       Float
+  invoiceStatus invoice_invoiceStatus
+}
+
+enum invoice_invoiceStatus {
+  Paid
+  Unpaid
+  Draft
+  Sent
+  Downloaded
+  Overdue
+}
+
+model User {
+  id         Int       @id @default(autoincrement())
+  username   String    @unique
+  privilege  Role
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  subjects   Subject[] @relation("TeacherSubjects")
+  enrolled_in Enrollment[] @relation("EnrolledSubjects")
+}
+
+enum Role {
+  Student
+  Teacher
+  BO
+  Registrar
+  Principal
+  VPrincipal
+  Guidance
+  Casher
+}
+
+model Subject {
+  id         Int      @id @default(autoincrement())
+  name       String
+  details    String
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  teacher    User     @relation("TeacherSubjects", fields: [teacherId], references: [id])
+  teacherId  Int
+  enrollments Enrollment[]
+}
+
+model Enrollment {
+  id        Int      @id @default(autoincrement())
+  student   User     @relation("EnrolledSubjects", fields: [studentId], references: [id])
+  studentId Int
+  subject   Subject  @relation(fields: [subjectId], references: [id])
+  subjectId Int
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+}

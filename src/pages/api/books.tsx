@@ -1,26 +1,35 @@
-import mysql from 'mysql2/promise'
+import sql from 'mssql'
+
+const sqlConfig = {
+  user: 'AbuevaC',
+  password: 'Sun112223!',
+  database: 'SUNPLUSADV',
+  server: 'localhost',
+  pool: {
+    max: 10,
+    min: 0,
+    idleTimeoutMillis: 30000
+  },
+  options: {
+    encrypt: true, // for azure
+    trustServerCertificate: false // change to true for local dev / self-signed certs
+  }
+}
 
 export default async (req, res) => {
   try {
-    const connection = await mysql.createConnection({
-      host: 'localhost',
-      user: 'root_dev',
-      password: 'D3b1an!?',
-      database: 'Sample'
-    })
+    // make sure that any items are correctly URL encoded in the connection string
+    await sql.connect(sqlConfig)
+    const result = await sql.query`SELECT TOP 1 * FROM EDU_A_SALFLDG`
 
-    // Your database query goes here. For example:
-    const [rows] = await connection.execute('SELECT * FROM books')
-    await connection.end()
-
-    // Send the fetched data to another endpoint
+    // Assuming you want to continue sending data to another endpoint
     const otherEndpointResponse = await fetch(`${process.env.BASE_URL}/api/test/books`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         origin: 'http://localhost:3000'
       },
-      body: JSON.stringify(rows)
+      body: JSON.stringify(result.recordset)
     })
 
     if (!otherEndpointResponse.ok) {
@@ -29,9 +38,8 @@ export default async (req, res) => {
 
     const otherEndpointData = await otherEndpointResponse.json()
     return res.json({ success: true, message: 'Data sent successfully!', otherEndpointData })
-
-    // res.json(rows)
-  } catch (error) {
-    res.status(500).json({ error: error.message })
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({ error: err.message })
   }
 }
